@@ -4,19 +4,18 @@ function TierList({ tierRows, removeFromTier }) {
   return (
     <div>
       <h1 className="font-extrabold ">insert DaTierList</h1>
-      {tierRows.map((data) => {
+      {Object.keys(tierRows).map((tierLetter, i) => {
         return (
           <>
             <div
               className="bg-gray-700 border-solid border-2 border-sky-500 text-5xl font-thin not-italic font-sans"
-              id={data.id}
+              id={tierLetter}
             >
               <div className="border-4 border-indigo-500/100">
-                <p className="font-extrabold ">{data.id}</p>
+                <p className="font-extrabold ">{tierLetter}</p>
               </div>
-
               <ul className="inline-grid grid-cols-3 gap-4">
-                {data.contetns.map((operators) => {
+                {tierRows[tierLetter].map((operators) => {
                   return (
                     <li key={operators.id}>
                       <img
@@ -28,7 +27,7 @@ function TierList({ tierRows, removeFromTier }) {
                         alt=""
                       />
                       <button
-                        onClick={() => removeFromTier(operators.id)}
+                        onClick={() => removeFromTier(operators.id, tierLetter)}
                         className="text-xl font-black hover:text-sky-700"
                       >
                         X
