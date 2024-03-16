@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useState, createRef } from "react";
 import TierList from "./components/TierList";
 import "./App.css";
 import OperatorList from "./components/OperatorList";
+import { useScreenshot, createFileName } from "use-react-screenshot";
 
 let TierRows = {
   S: [],
+  A: [],
+  B: [],
+  C: [],
+};
 
+const EmptyTierRows = {
+  S: [],
   A: [],
   B: [],
   C: [],
@@ -56,11 +63,31 @@ const AllOperatorsList = [
   },
 ];
 
+let TotalOperators = AllOperatorsList.length;
 function App() {
   const [tierListState, setTierListState] = useState(TierRows);
 
   const [allOperatorsListState, setAllOperatorsListState] =
     useState(AllOperatorsList);
+
+  const [showRubbishBin, setShowRubbishBin] = useState(false);
+
+  const [showCameraIcon, setShowCameraIcon] = useState(false);
+
+  const ref = createRef(null);
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const download = (image, { name = "img", extension = "jpg" } = {}) => {
+    const a = document.createElement("a");
+    a.href = image;
+    a.download = createFileName(extension, name);
+    a.click();
+  };
+
+  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
 
   function removeFromTier(OperatorId, TierId) {
     let OperatorObject = tierListState[TierId].find((x) => x.id === OperatorId);
@@ -69,9 +96,15 @@ function App() {
       let newArray = prevState[TierId].filter((item) => {
         return item.id !== OperatorId;
       });
-
+      let ArrayToCheckLength = allOperatorsListState;
       let newTier = prevState;
       newTier[TierId] = newArray;
+
+      if (ArrayToCheckLength.length + 1 == TotalOperators) {
+        setShowRubbishBin(false);
+        setShowCameraIcon(false);
+      }
+
       return { ...newTier };
     });
   }
@@ -99,17 +132,43 @@ function App() {
       return { ...newTier };
     });
     removeFromAllOperatorsList(OperatorId);
+    setShowRubbishBin(true);
+    setShowCameraIcon(true);
   }
+
+  function resetTierList() {
+    const tempEmpty = EmptyTierRows;
+    setTierListState(() => {
+      return { ...tempEmpty };
+    });
+    setAllOperatorsListState(AllOperatorsList);
+
+    setShowRubbishBin(false);
+    setShowCameraIcon(false);
+  }
+
   return (
     <>
-      <main className="">
-        <TierList tierRows={tierListState} removeFromTier={removeFromTier} />
+      <div ref={ref}>
+        <img
+          src="https://pbs.twimg.com/media/EVPZSSzUUAIBswf?format=jpg&name=large"
+          className="w-full h-full -z-10 absolute bg-cover bg-center top-0 left-0 blur-sm "
+        />
+        <div>
+          <TierList tierRows={tierListState} removeFromTier={removeFromTier} />
+        </div>
+      </div>
+      <div>
         <OperatorList
           list={allOperatorsListState}
           tierRows={tierListState}
           SendToTier={SendToTier}
+          showRubbishBin={showRubbishBin}
+          resetTierList={resetTierList}
+          showCameraIcon={showCameraIcon}
+          takeScreenshot={downloadScreenshot}
         />
-      </main>
+      </div>
     </>
   );
 }
