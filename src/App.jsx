@@ -82,7 +82,7 @@ function App() {
   function getOperators() {
     axios({
       method: "GET",
-      url: "http://localhost:27017/getOperators",
+      url: "https://datierlist-backend.onrender.com/getOperators",
       mode: "no-cors",
 
       proxy: {
