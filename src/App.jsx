@@ -1,8 +1,10 @@
-import { useState, createRef } from "react";
+import { useState, createRef, useEffect } from "react";
 import TierList from "./components/TierList";
 import "./App.css";
 import OperatorList from "./components/OperatorList";
 import { useScreenshot, createFileName } from "use-react-screenshot";
+
+import axios from "axios";
 
 let TierRows = {
   S: [],
@@ -18,7 +20,9 @@ const EmptyTierRows = {
   C: [],
 };
 
-const AllOperatorsList = [
+let didInit = false;
+
+let AllOperatorsList = [
   {
     id: "Executor the Ex Foedere",
     image:
@@ -40,7 +44,7 @@ const AllOperatorsList = [
     profession: "Guard",
     archetype: "Ranged",
   },
-  {
+  /*   {
     id: "Liskarm",
     image:
       "https://gamepress.gg/arknights/sites/arknights/files/game-images/avatars/char_107_liskam_1.png",
@@ -60,10 +64,11 @@ const AllOperatorsList = [
       "https://gamepress.gg/arknights/sites/arknights/files/game-images/avatars/char_136_hsguma_1.png",
     profession: "Defender",
     archetype: "protector",
-  },
+  }, */
 ];
 
 let TotalOperators = AllOperatorsList.length;
+
 function App() {
   const [tierListState, setTierListState] = useState(TierRows);
 
@@ -73,6 +78,24 @@ function App() {
   const [showRubbishBin, setShowRubbishBin] = useState(false);
 
   const [showCameraIcon, setShowCameraIcon] = useState(false);
+
+  function getOperators() {
+    axios({
+      method: "GET",
+      url: "http://localhost:27017/getOperators",
+      mode: "no-cors",
+
+      proxy: {
+        host: "localhost",
+        port: 27017,
+      },
+    }).then((response) => {
+      AllOperatorsList = response.data;
+      setAllOperatorsListState(response.data);
+
+      console.log(AllOperatorsList);
+    });
+  }
 
   const ref = createRef(null);
   const [image, takeScreenShot] = useScreenshot({
@@ -88,6 +111,13 @@ function App() {
   };
 
   const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+
+  useEffect(() => {
+    if (!didInit) {
+      didInit = true;
+      getOperators();
+    }
+  });
 
   function removeFromTier(OperatorId, TierId) {
     let OperatorObject = tierListState[TierId].find((x) => x.id === OperatorId);
@@ -141,6 +171,7 @@ function App() {
     setTierListState(() => {
       return { ...tempEmpty };
     });
+    console.log("inside reset", AllOperatorsList);
     setAllOperatorsListState(AllOperatorsList);
 
     setShowRubbishBin(false);

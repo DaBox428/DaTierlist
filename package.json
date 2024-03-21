@@ -1,6 +1,8 @@
 {
   "name": "tierlist2",
   "private": true,
+  "port": 27017,
+  "proxy": "http://localhost:27017",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -11,6 +13,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
+    "axios": "^1.6.8",
     "html2canvas": "^1.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
